@@ -1,0 +1,42 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest  
+stages:
+  - stage: get-write-secret-key-vault
+    jobs:
+      - job: secure_secret_handling
+        steps:
+          - task: AzureKeyVault@2
+            displayName: Get secret from key vault 
+            inputs:
+              azureSubscription: ''  
+              KeyVaultName: ''
+              SecretsFilter: 'DatabasePassword'  
+          - task: CmdLine@2 
+            displayName: write secret into File
+            inputs:   
+              script: |
+                  echo $(DatabasePassword) 
+                   echo $(DatabasePassword) > secretdb.txt
+                  cat secretdb.txt
+
+  - stage: copy-publish-artifacts  
+    dependsOn: get-write-secret-key-vault  
+    condition: succeeded()  
+    jobs:
+      - job: publish_artifacts
+        steps:
+          - task: CopyFiles@2  
+            displayName: Copy the file
+            inputs:
+              Contents: ''  
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish artifacts
+            inputs:
+              PathToPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'drop'
+              PublishLocation: 'Container'
