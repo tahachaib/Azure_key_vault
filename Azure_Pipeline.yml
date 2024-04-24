@@ -4,7 +4,7 @@ trigger:
 pool:
   vmImage: ubuntu-latest  
 stages:
-  - stage: get-write-secret-key-vault
+  - stage: get_write_secret_key_vault
     jobs:
       - job: secure_secret_handling
         steps:
@@ -22,8 +22,8 @@ stages:
                    echo $(DatabasePassword) > secretdb.txt
                   cat secretdb.txt
 
-  - stage: copy-publish-artifacts  
-    dependsOn: get-write-secret-key-vault  
+  - stage: copy_publish_artifacts  
+    dependsOn: get_write_secret_key_vault  
     condition: succeeded()  
     jobs:
       - job: publish_artifacts
